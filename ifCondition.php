@@ -15,19 +15,17 @@
     protected static $conditions = array();
     
     protected $condition;
-    protected $params;
     protected $match;
     
-    protected function __construct($condition, array $params = array())
+    protected function __construct($condition)
     {
       $this->condition = trim($condition);
-      $this->params = $params;
-      $this->match = self::execute($this->condition, $this->params);
+      $this->match = self::execute($this->condition);
     }
     
-    public static function start($condition, array $params = array())
+    public static function start($condition)
     {
-      self::$conditions[] = new self($condition, $params);
+      self::$conditions[] = new self($condition);
     }
     
     public static function end()
@@ -41,17 +39,16 @@
       return $i === 0 ? null : self::$conditions[$i-1];
     }
     
-    public static function execute($condition, array $params = array())
+    public static function execute($condition)
     {
       
       if (!empty($condition)) {
       
         $fn = function() {
-          extract(func_get_arg(1));
           return (bool) @eval('return '.func_get_arg(0).';');
         };
 
-        return $fn($condition, $params);
+        return $fn($condition);
                 
       }
       
@@ -69,14 +66,11 @@
   
   add_shortcode('if', function($atts, $content) {
         
-    $params = shortcode_atts(array(
+    $atts = shortcode_atts(array(
       'condition' => null
     ), $atts);
     
-    $condition = $params['condition'];
-    unset($params['condition']);
-    
-    IfCondition::start($condition, $params);
+    IfCondition::start($atts['condition']);
     $content = do_shortcode($content);
     IfCondition::end();
       
