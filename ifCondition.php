@@ -4,7 +4,7 @@
    * Plugin Name: IfCondition
    * Description: This plugins allows you to write simple conditions inside your wordpress content.
    * Plugin URI: http://www.squareflower.de/
-   * Version: 1.0.2
+   * Version: 1.0.1
    * Author: Lukas Rydygel
    * Author URI: http://www.squareflower.de/
    */
@@ -67,7 +67,7 @@
   function do_condition($string)
   {
 
-    return preg_replace_callback('/\[if condition=\"(.*?)\"\](.*?)\[\/if]/s', function($matches) {
+    return preg_replace_callback('/\[if condition=\"(.*?)\"\](.*?)\[\/if]/', function($matches) {
 
       IfCondition::start($matches[1]);
       $content = do_shortcode($matches[2]);
