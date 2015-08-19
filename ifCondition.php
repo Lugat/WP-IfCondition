@@ -4,7 +4,7 @@
    * Plugin Name: IfCondition
    * Description: This plugins allows you to write simple conditions inside your wordpress content.
    * Plugin URI: http://www.squareflower.de/
-   * Version: 1.0.1
+   * Version: 1.0.3
    * Author: Lukas Rydygel
    * Author URI: http://www.squareflower.de/
    */
@@ -15,12 +15,12 @@
     protected static $conditions = array();
     
     protected $condition;
-    protected $match;
+    protected $matched;
     
     protected function __construct($condition)
     {
       $this->condition = trim($condition);
-      $this->match = self::execute($this->condition);
+      $this->matched = self::execute($this->condition);
     }
     
     public static function start($condition)
@@ -45,7 +45,7 @@
       if (!empty($condition)) {
       
         $fn = function() {
-          return (bool) @eval("return ".func_get_arg(0).";");
+          return (bool) @eval('return '.func_get_arg(0).';');
         };
 
         return $fn($condition);
@@ -59,7 +59,7 @@
     public static function matched()
     {
       $condition = self::current();
-      return isset($condition) ? $condition->match : false;
+      return isset($condition) ? $condition->matched : false;
     }
     
   }
@@ -67,10 +67,16 @@
   function do_condition($string)
   {
 
-    return preg_replace_callback('/\[if condition=\"(.*?)\"\](.*?)\[\/if]/', function($matches) {
+    return preg_replace_callback('/\[if condition=\"(.*?)\"\](.*?)\[\/if]/s', function($matches) {
 
       IfCondition::start($matches[1]);
-      $content = do_shortcode($matches[2]);
+            
+      if (has_shortcode($matches[2], 'then') || has_shortcode($matches[2], 'else')) {
+        $content = do_shortcode($matches[2]);
+      } else {
+        $content = IfCondition::matched() === true ? do_shortcode($matches[2]) : null;
+      }
+            
       IfCondition::end();
 
       return $content;
